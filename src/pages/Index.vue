@@ -203,7 +203,7 @@ export default {
           inputs: {},
           query: "你好啊",
           response_mode: "blocking",
-          conversation_id: "1",
+          conversation_id: "",
           user: "Soul",
         });
         this.$nextTick(() => {

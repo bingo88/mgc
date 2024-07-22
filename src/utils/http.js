@@ -7,8 +7,8 @@ import axios from 'axios'
 import { Loading } from 'element-ui';
 // 创建的axios的实列 instance
 const instance = axios.create({
-    baseURL: 'https://dify.soul0521.buzz', // 基准地址  可直接配置路径,也可代理路径(以实际项目为准)
-    timeout: 10000 // 超时时间
+    baseURL: '/api', // 基准地址  可直接配置路径,也可代理路径(以实际项目为准)
+    timeout: 60000 // 超时时间
 })
 // 请求拦截
 // 声明变量接收logding
@@ -16,7 +16,7 @@ let loadingInstance
 instance.interceptors.request.use((config) => {
     // 设置请求头
     // let token = localStorage.getItem('token')
-    config.headers.Authorization = 'Bearer app-MjPhIKMyRYpqcgvMKmwsvfYx'
+    config.headers.Authorization = 'Bearer app-rn87XsLFKp0NU8dNewpRsDP6'
     //设置logding配置 赋值
     loadingInstance = Loading.service({
         lock: true,

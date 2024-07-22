@@ -1,0 +1,39 @@
+<template>
+  <div id="app">
+    <router-view></router-view>
+  </div>
+</template>
+
+<script>
+
+export default {
+  name: "App"
+};
+</script>
+
+<style>
+body {
+  padding: 0;
+  margin: 0;
+  background-color: #f4f9fd;
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+  min-height: 100vh; /* 保证整个视窗高度都被占据 */
+}
+*{
+  font-size: 16px;
+  color: #fff;
+}
+#app{
+  width: 100%;
+}
+/* .my-btn{
+  background-color: rgb(58 203 233) !important;
+  color: #fff !important;
+  border: none !important;
+}
+.my-btn.is-disabled{
+  background-color: rgb(138, 224, 241) !important;
+} */
+</style>

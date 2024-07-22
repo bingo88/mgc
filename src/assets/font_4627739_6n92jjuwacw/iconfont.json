@@ -1,0 +1,16 @@
+{
+  "id": "4627739",
+  "name": "mgc",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "2076196",
+      "name": "赞",
+      "font_class": "zan",
+      "unicode": "e870",
+      "unicode_decimal": 59504
+    }
+  ]
+}

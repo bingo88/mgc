@@ -7,7 +7,7 @@ module.exports = {
         // }
         proxy: {
             '/api': {
-              target: 'https://dify.soul0521.buzz',
+              target: 'http://192.168.221.236:8080',
               changeOrigin: true,
               pathRewrite: {
                 '^/api': ''

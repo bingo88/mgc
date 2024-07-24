@@ -12,6 +12,9 @@ export default {
 </script>
 
 <style>
+.el-message-box {
+  width: 80% !important; 
+}
 body {
   padding: 0;
   margin: 0;
@@ -23,7 +26,7 @@ body {
 }
 *{
   font-size: 16px;
-  color: #fff;
+  /* color: #fff; */
 }
 #app{
   width: 100%;

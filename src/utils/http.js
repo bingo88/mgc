@@ -18,12 +18,12 @@ instance.interceptors.request.use((config) => {
     // let token = localStorage.getItem('token')
     config.headers.Authorization = 'Bearer app-rn87XsLFKp0NU8dNewpRsDP6'
     //设置logding配置 赋值
-    loadingInstance = Loading.service({
-        lock: true,
-        text: '拼命加载中...',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-    });
+    // loadingInstance = Loading.service({
+    //     lock: true,
+    //     text: '拼命加载中...',
+    //     spinner: 'el-icon-loading',
+    //     background: 'rgba(0, 0, 0, 0.7)'
+    // });
    // 返回请求头
     return config
 }, err => {
@@ -34,7 +34,7 @@ instance.interceptors.request.use((config) => {
 // 响应拦截
 instance.interceptors.response.use((res) => {
     // 响应成功则关闭loading加载
-    loadingInstance.close();
+    // loadingInstance.close();
     //返回响应数据
     return res
 }, err => {

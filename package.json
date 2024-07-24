@@ -19,6 +19,7 @@
     "nodemailer": "^6.9.8",
     "postcss-pxtorem": "^6.1.0",
     "secure-random": "^1.1.2",
+    "uview-ui": "^2.0.36",
     "vue": "^2.6.11",
     "vue-core-video-player": "^0.2.0",
     "vue-router": "^3.6.5",

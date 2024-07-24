@@ -1,5 +1,12 @@
 <template>
   <div class="box">
+    <!-- 秒杀 -->
+    <FlashSale></FlashSale>
+    <!-- 进入弹窗显示 -->
+    <!-- <div class="dialog" v-if="isShowDialog">
+      <div class="dialog-info">欢迎 用户xxx 进入直播间！</div>
+      <el-button type="primary" @click="play">确定</el-button>
+    </div> -->
     <!-- 头部 -->
     <div class="header">
       <div class="header-left">
@@ -33,7 +40,15 @@
     </div>
     <!-- 直播区 -->
     <div class="main">
-      <!-- <vue-core-video-player :src="url" :controls="false" :autoplay="true" :muted="true"/> -->
+      <vue-core-video-player
+        class="video-player"
+        ref="videoPlayer"
+        :src="url"
+        :loop="true"
+        :controls="false"
+        :autoplay="true"
+        :fluid="true"
+      />
     </div>
     <!-- 商品信息 -->
     <div v-if="!isShowAllProduce">
@@ -46,12 +61,15 @@
         <div class="proBtns">
           <el-button
             type="primary"
-            icon="icon iconfont icon-zan"
+            :icon="
+              islike ? 'icon iconfont icon-zan1' : 'icon iconfont icon-zan'
+            "
+            @click="islike = !islike"
             size="small"
           ></el-button>
           <el-button
             type="primary"
-            icon="el-icon-s-goods"
+            icon="el-icon-goods"
             size="small"
           ></el-button>
         </div>
@@ -64,12 +82,15 @@
             <div class="proBtns">
               <el-button
                 type="primary"
-                icon="icon iconfont icon-zan"
+                :icon="
+                  islike ? 'icon iconfont icon-zan1' : 'icon iconfont icon-zan'
+                "
+                @click="islike = !islike"
                 size="small"
               ></el-button>
               <el-button
                 type="primary"
-                icon="el-icon-s-goods"
+                icon="el-icon-goods"
                 size="small"
               ></el-button>
             </div>
@@ -81,11 +102,13 @@
       </div>
     </div>
 
-    <div v-if="!isShowAllProduce" class="footer">
+    <div v-if="!isShowAllProduce && !isShowMore" class="footer">
       <!-- 弹幕区 -->
       <div class="comment-box">
         <div class="pointMe">
-          <el-button type="primary" size="mini">@我的</el-button>
+          <el-button type="primary" size="mini" @click="scrollToMyInfo"
+            >@我的</el-button
+          >
         </div>
         <div class="up" v-if="!isExpand">
           <el-button type="primary" @click="isExpand = !isExpand"
@@ -103,24 +126,62 @@
           :class="isExpand ? 'expand' : 'noExpand'"
         >
           <div
-            class="comment"
             v-for="(comment, index) in allComments"
             :key="index"
+            class="item"
+            :id="`item-${index}`"
           >
-            <div class="comment-left">
-              <el-avatar
-                src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
-                :size="30"
-              ></el-avatar>
+            <div
+              :class="
+                comment.username === 'Midea' ? 'midea-comment' : 'comment'
+              "
+            >
+              <div class="comment-left">
+                <el-avatar :src="comment.img" :size="30"></el-avatar>
+              </div>
+              <div class="comment-right">
+                <div class="comment-title">
+                  <div class="comment-username">{{ comment.username }}</div>
+                  <el-tag v-if="comment.username === 'Midea'" size="mini"
+                    >官方</el-tag
+                  >
+                  <el-tag
+                    v-if="comment.username === 'Me'"
+                    type="success"
+                    size="mini"
+                    >我</el-tag
+                  >
+                </div>
+
+                <div class="comment-info">{{ comment.content }}</div>
+              </div>
             </div>
-            <div class="comment-right">
-              <div class="comment-username">{{ comment.username }}</div>
-              <div class="comment-info">{{ comment.content }}</div>
+            <div class="comment-buttom" v-if="comment.username === 'Midea'">
+              <div>对此回答是否满意：</div>
+              <el-button
+                type="primary"
+                :icon="
+                  comment.likeTag === '1'
+                    ? 'icon iconfont icon-zan1'
+                    : 'icon iconfont icon-zan'
+                "
+                @click="comment.likeTag = '1'"
+                size="mini"
+              ></el-button>
+              <el-button
+                type="primary"
+                :icon="
+                  comment.likeTag === '2'
+                    ? 'icon iconfont icon-cai1'
+                    : 'icon iconfont icon-cai'
+                "
+                @click="comment.likeTag = '2'"
+                size="mini"
+              ></el-button>
             </div>
           </div>
         </div>
       </div>
-
       <!-- 底部输入区 -->
       <div class="actions">
         <div class="input">
@@ -138,12 +199,21 @@
         ></el-button>
         <el-button
           type="primary"
-          icon="el-icon-s-goods"
+          icon="el-icon-goods"
           circle
           @click="showAllProducts"
         ></el-button>
-        <el-button type="primary" icon="el-icon-more" circle></el-button>
+        <el-button
+          type="primary"
+          icon="el-icon-more"
+          @click="isShowMore = true"
+          circle
+        ></el-button>
       </div>
+    </div>
+    <!-- 更多 -->
+    <div v-else-if="isShowMore">
+      <More @close="closeMore"></More>
     </div>
     <!-- 商品详情 -->
     <div v-else ref="productsList">
@@ -154,62 +224,111 @@
 
 <script>
 import ProductsList from "../components/productsList.vue";
-import {getAnswer} from "@/utils/api.js";
+import More from "../components/more.vue";
+import FlashSale from '../components/flashSale.vue'
+import { getAnswer, getConversation } from "@/utils/api.js";
 export default {
   name: "Index",
-  components: { ProductsList },
+  components: { ProductsList, More,FlashSale },
   data() {
     return {
-      url: require("../imgs/v1.mp4"),
+      url: require("../imgs/6.mp4"),
       input: "",
       isfocus: false,
+      islike: false,
+      isShowDialog: true,
       allComments: [
         {
           username: "AA",
           content: "Good!",
+          img: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
         },
         {
           username: "BB",
           content: "Gooooooooooooooooooooooooooooooooooooooood!",
+          img: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
         },
         {
           username: "CC",
           content: "Gooooooooooooooood!",
+          img: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
         },
       ],
       // 是否展开弹幕区
       isExpand: false,
       // 是否查看全部商品
       isShowAllProduce: false,
+      // 是否打开更多
+      isShowMore: false,
     };
   },
   mounted() {
     document.addEventListener("click", this.handleClickOutside);
+    // getConversation()
   },
   beforeDestroy() {
     // 在组件销毁时移除全局点击事件监听器
     document.removeEventListener("click", this.handleClickOutside);
   },
   methods: {
+    // 关闭更多页面
+    closeMore() {
+      this.isShowMore = false;
+    },
+    // 播放视频
+    play() {
+      const videoPlayer = this.$refs.videoPlayer;
+      if (videoPlayer && videoPlayer.$el) {
+        const videoElement = videoPlayer.$el.querySelector("video");
+        if (videoElement) {
+          videoElement.play().catch((error) => {
+            console.error("111:", error);
+          });
+        }
+        this.isShowDialog = false;
+      }
+    },
     // 提交弹幕输入
     async onChange() {
       if (this.input) {
         this.allComments.push({
           username: "Me",
           content: this.input,
+          img: require("@/imgs/5.png"),
         });
+        const query = this.input;
         this.input = "";
-        await getAnswer({
-          inputs: {},
-          query: "你好啊",
-          response_mode: "blocking",
-          conversation_id: "",
-          user: "Soul",
-        });
         this.$nextTick(() => {
           const comments = this.$refs.comments;
           comments.scrollTop = comments.scrollHeight;
         });
+        // const data = await getAnswer({
+        //   inputs: {
+        //     user: "soul",
+        //   },
+        //   query: query,
+        //   response_mode: "blocking",
+        //   conversation_id: "",
+        //   user: "abc-123",
+        // });
+        const data = await getAnswer({
+          commentId: "1",
+          username: "soul1",
+          comment: "功率多大",
+        });
+        if (data.data.answer) {
+          let response = {
+            username: "Midea",
+            content: data.data.answer,
+            img: require("@/imgs/midea.jpg"),
+            likeTag: "0",
+          };
+          this.allComments.push(response);
+          this.$nextTick(() => {
+            const comments = this.$refs.comments;
+            comments.scrollTop = comments.scrollHeight;
+          });
+        }
       }
     },
     showAllProducts(event) {
@@ -225,6 +344,14 @@ export default {
         this.isShowAllProduce = false;
       }
     },
+    // @我的
+    scrollToMyInfo() {
+      console.log("tttttttt");
+      const element = document.getElementById(`item-2`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    },
   },
 };
 </script>
@@ -232,6 +359,24 @@ export default {
 <style scoped lang="scss">
 .box {
   position: relative;
+  .dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    width: 310px;
+    height: 130px;
+    background-color: rgb(253, 252, 248);
+    z-index: 100;
+    border-radius: 12px;
+    .dialog-info {
+      font-size: 18px;
+    }
+  }
   .header {
     display: flex;
     justify-content: space-between;
@@ -241,7 +386,7 @@ export default {
     left: 0;
     height: 80px;
     width: 100%;
-    z-index: 2;
+    z-index: 99;
     .header-left {
       display: flex;
       align-items: center;
@@ -253,6 +398,7 @@ export default {
       }
       .name {
         flex: 1;
+        color: #fff;
         .title {
           font-size: 18px;
         }
@@ -276,6 +422,7 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
+        color: #fff;
       }
       .live {
         width: 40%;
@@ -286,6 +433,7 @@ export default {
         align-items: center;
         border-radius: 13px;
         background-color: red;
+        color: #fff;
       }
     }
   }
@@ -296,6 +444,19 @@ export default {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    overflow: hidden;
+    ::v-deep .play-pause-layer {
+      display: none;
+      background-color: transparent;
+    }
+    ::v-deep .vcp-container video {
+      width: auto;
+    }
+    .video-player {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   }
   .expandProduct-box {
     position: absolute;
@@ -304,6 +465,7 @@ export default {
     width: 100%;
     padding: 10px;
     box-sizing: border-box;
+    z-index: 99;
   }
   .expandProduct {
     display: flex;
@@ -315,7 +477,7 @@ export default {
       margin-right: 10px;
       .proImg {
         width: 260px;
-        height: 140px;
+        height: 18vh;
         background-image: url("~@/imgs/4.jpg");
         background-size: cover;
         background-position: center;
@@ -331,7 +493,7 @@ export default {
     }
     .proDesc {
       flex: 1;
-      // color: black;
+      color: #fff;
       // background-color: #fff;
       overflow: hidden;
       display: -webkit-box;
@@ -345,6 +507,7 @@ export default {
     top: 100px;
     left: 0;
     width: 120px;
+    z-index: 99;
     .proImg {
       width: 120px;
       height: 120px;
@@ -375,7 +538,7 @@ export default {
       ::v-deep .iconfont {
         font-size: 20px;
       }
-      ::v-deep .el-icon-s-goods {
+      ::v-deep .el-icon-goods {
         font-size: 20px;
       }
     }
@@ -387,6 +550,8 @@ export default {
     width: 100%;
     padding: 10px;
     box-sizing: border-box;
+    z-index: 99;
+    color: #fff;
 
     .comment-box {
       background-color: rgba(0, 0, 0, 0.5);
@@ -410,30 +575,41 @@ export default {
         height: 220px;
       }
       .expand {
-        height: 500px;
+        height: 50vh;
       }
       .comments {
         overflow-y: auto; /* 垂直方向自动滚动 */
         overflow-x: hidden; /* 水平方向隐藏滚动条 */
-
-        .comment {
+        .item {
+          margin-bottom: 10px;
+          padding: 4px 6px;
+        }
+        .comment,
+        .midea-comment {
           display: flex;
           width: fit-content;
           max-width: 100%;
           word-break: break-all;
-          margin-bottom: 10px;
-          padding: 4px 6px;
           // background-color: rgba(111, 114, 117, 0.6);
-          border-radius: 14px;
           .comment-left {
             margin-right: 8px;
           }
           .comment-right {
+            .comment-title {
+              display: flex;
+              .comment-username {
+                margin-right: 6px;
+              }
+            }
             .comment-info {
-              color: rgba(255, 255, 255, 0.9);
               font-size: 14px;
             }
           }
+        }
+        .comment-buttom {
+          display: flex;
+          align-items: center;
+          margin-top: 4px;
         }
       }
     }

@@ -7,6 +7,7 @@ export const getConversation = ()=>api.get('/mgc/getAllComments')
 
 export const getToMeLatestAnswer = (username)=>api.get('/mgc/getToMeLatestAnswer',{ params: { username }})
 
+export const addCommentAsync = (params)=>api.post('/mgc/addCommentAsync',params)
 
 
 

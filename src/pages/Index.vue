@@ -230,6 +230,7 @@ import {
   getAnswer,
   getConversation,
   getToMeLatestAnswer,
+  addCommentAsync,
 } from "@/utils/api.js";
 import { uuid } from "@/utils/uuid.js";
 export default {
@@ -273,7 +274,7 @@ export default {
 
     // 组件挂载后开始定期获取弹幕数据
     this.getAllComment(); // 立即获取一次数据
-    this.intervalId = setInterval(this.getAllComment, 10000); // 每5秒获取一次数据
+    this.intervalId = setInterval(this.getAllComment, 5000); // 每5秒获取一次数据
   },
   beforeDestroy() {
     // 在组件销毁时移除全局点击事件监听器
@@ -289,6 +290,7 @@ export default {
           {
             username: item.username,
             content: item.comment,
+            id: item.id,
             img:
               item.username === this.username
                 ? require("@/imgs/5.png")
@@ -297,14 +299,17 @@ export default {
           {
             username: "Midea",
             content: item.commentAnswer,
-            id: item.id,
             likeTag: "0",
             img: require("@/imgs/midea.jpg"),
           },
         ];
       });
-      this.allComments = comments.flat();
-      if (this.allComments.length > oldLength) {
+      comments = comments.flat();
+      if (
+        comments.length > oldLength &&
+        comments[comments.length - 1].content
+      ) {
+        this.allComments = comments;
         this.$nextTick(() => {
           const comments = this.$refs.comments;
           comments.scrollTop = comments.scrollHeight;
@@ -342,23 +347,23 @@ export default {
           const comments = this.$refs.comments;
           comments.scrollTop = comments.scrollHeight;
         });
-        const data = await getAnswer({
+        const data = await addCommentAsync({
           username: this.username,
           comment: query,
         });
-        if (data.data.data) {
-          let response = {
-            username: "Midea",
-            content: data.data.data,
-            img: require("@/imgs/midea.jpg"),
-            likeTag: "0",
-          };
-          this.allComments.push(response);
-          this.$nextTick(() => {
-            const comments = this.$refs.comments;
-            comments.scrollTop = comments.scrollHeight;
-          });
-        }
+        // if (data.data.data) {
+        //   let response = {
+        //     username: "Midea",
+        //     content: data.data.data,
+        //     img: require("@/imgs/midea.jpg"),
+        //     likeTag: "0",
+        //   };
+        //   this.allComments.push(response);
+        //   this.$nextTick(() => {
+        //     const comments = this.$refs.comments;
+        //     comments.scrollTop = comments.scrollHeight;
+        //   });
+        // }
       }
     },
     showAllProducts(event) {
@@ -376,9 +381,8 @@ export default {
     },
     // @我的
     async scrollToMyInfo() {
-      console.log("tttttttt");
-      // const data = await getToMeLatestAnswer(this.username);
-      const data = await getToMeLatestAnswer("dapO");
+      const data = await getToMeLatestAnswer(this.username);
+      // const data = await getToMeLatestAnswer("dapO");
       const id = data.data.data.id;
       const element = document.getElementById(`item-${id}`);
       if (element) {

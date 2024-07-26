@@ -1,12 +1,12 @@
 <template>
   <div class="box">
-    <!-- 秒杀 -->
-    <FlashSale></FlashSale>
+    <!--  秒杀 -->
+    <FlashSale v-if="false"></FlashSale>
     <!-- 进入弹窗显示 -->
-    <!-- <div class="dialog" v-if="isShowDialog">
-      <div class="dialog-info">欢迎 用户xxx 进入直播间！</div>
+    <div class="dialog" v-if="isShowDialog">
+      <div class="dialog-info">欢迎 用户{{ this.username }} 进入直播间！</div>
       <el-button type="primary" @click="play">确定</el-button>
-    </div> -->
+    </div>
     <!-- 头部 -->
     <div class="header">
       <div class="header-left">
@@ -55,9 +55,7 @@
       <div v-if="!isExpand" class="noExpandProduct">
         <!-- 未展开 -->
         <div class="proImg"></div>
-        <div class="proDesc">
-          【赤炎稻香】IH智能电饭煲 4L 立体双热源 全域零涂层 MB-HS453S 雅士金
-        </div>
+        <div class="proDesc">美的（家用空调）KFR-26GW-N8KS1-1</div>
         <div class="proBtns">
           <el-button
             type="primary"
@@ -96,7 +94,9 @@
             </div>
           </div>
           <div class="proDesc">
-            【赤炎稻香】IH智能电饭煲 4L 立体双热源 全域零涂层 MB-HS453S 雅士金
+            KFR-26GW-N8KS1-1空调，大1匹壁挂式，具有多项出色功能。省电新升级，全天候节能运行，还可查询电量。拥有第四代智清洁、忘关机提醒等贴心功能。支持APP智能控制，操作便捷。制冷适用面积11
+            - 17㎡，制热适用面积13 -
+            17㎡。1级能效，全直流变频，节能环保。配有遥控器，按键功能丰富，包括酷省电、防直吹、智清洁等模式。
           </div>
         </div>
       </div>
@@ -129,7 +129,7 @@
             v-for="(comment, index) in allComments"
             :key="index"
             class="item"
-            :id="`item-${index}`"
+            :id="`item-${comment.id}`"
           >
             <div
               :class="
@@ -146,7 +146,7 @@
                     >官方</el-tag
                   >
                   <el-tag
-                    v-if="comment.username === 'Me'"
+                    v-if="comment.username === username"
                     type="success"
                     size="mini"
                     >我</el-tag
@@ -225,11 +225,16 @@
 <script>
 import ProductsList from "../components/productsList.vue";
 import More from "../components/more.vue";
-import FlashSale from '../components/flashSale.vue'
-import { getAnswer, getConversation } from "@/utils/api.js";
+import FlashSale from "../components/flashSale.vue";
+import {
+  getAnswer,
+  getConversation,
+  getToMeLatestAnswer,
+} from "@/utils/api.js";
+import { uuid } from "@/utils/uuid.js";
 export default {
   name: "Index",
-  components: { ProductsList, More,FlashSale },
+  components: { ProductsList, More, FlashSale },
   data() {
     return {
       url: require("../imgs/6.mp4"),
@@ -237,40 +242,75 @@ export default {
       isfocus: false,
       islike: false,
       isShowDialog: true,
-      allComments: [
-        {
-          username: "AA",
-          content: "Good!",
-          img: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
-        },
-        {
-          username: "BB",
-          content: "Gooooooooooooooooooooooooooooooooooooooood!",
-          img: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
-        },
-        {
-          username: "CC",
-          content: "Gooooooooooooooood!",
-          img: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
-        },
-      ],
+      allComments: [],
       // 是否展开弹幕区
       isExpand: false,
       // 是否查看全部商品
       isShowAllProduce: false,
       // 是否打开更多
       isShowMore: false,
+      username: "",
     };
   },
-  mounted() {
+  async mounted() {
+    this.username = uuid(4);
     document.addEventListener("click", this.handleClickOutside);
-    // getConversation()
+
+    const script1 = document.createElement("script");
+    script1.innerHTML = `
+      window.difyChatbotConfig = {
+        token: 'hOOKvyKOIlVSAL4T',
+        baseUrl: 'http://dify.soul0521.buzz'
+      };
+    `;
+    document.head.appendChild(script1);
+
+    const script2 = document.createElement("script");
+    script2.src = "http://dify.soul0521.buzz/embed.min.js";
+    script2.id = "hOOKvyKOIlVSAL4T";
+    script2.defer = true;
+    document.head.appendChild(script2);
+
+    // 组件挂载后开始定期获取弹幕数据
+    this.getAllComment(); // 立即获取一次数据
+    this.intervalId = setInterval(this.getAllComment, 10000); // 每5秒获取一次数据
   },
   beforeDestroy() {
     // 在组件销毁时移除全局点击事件监听器
     document.removeEventListener("click", this.handleClickOutside);
   },
   methods: {
+    // 获取弹幕
+    async getAllComment() {
+      const oldLength = this.allComments.length;
+      const data = await getConversation();
+      let comments = data.data.data.map((item) => {
+        return [
+          {
+            username: item.username,
+            content: item.comment,
+            img:
+              item.username === this.username
+                ? require("@/imgs/5.png")
+                : "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
+          },
+          {
+            username: "Midea",
+            content: item.commentAnswer,
+            id: item.id,
+            likeTag: "0",
+            img: require("@/imgs/midea.jpg"),
+          },
+        ];
+      });
+      this.allComments = comments.flat();
+      if (this.allComments.length > oldLength) {
+        this.$nextTick(() => {
+          const comments = this.$refs.comments;
+          comments.scrollTop = comments.scrollHeight;
+        });
+      }
+    },
     // 关闭更多页面
     closeMore() {
       this.isShowMore = false;
@@ -292,7 +332,7 @@ export default {
     async onChange() {
       if (this.input) {
         this.allComments.push({
-          username: "Me",
+          username: this.username,
           content: this.input,
           img: require("@/imgs/5.png"),
         });
@@ -302,24 +342,14 @@ export default {
           const comments = this.$refs.comments;
           comments.scrollTop = comments.scrollHeight;
         });
-        // const data = await getAnswer({
-        //   inputs: {
-        //     user: "soul",
-        //   },
-        //   query: query,
-        //   response_mode: "blocking",
-        //   conversation_id: "",
-        //   user: "abc-123",
-        // });
         const data = await getAnswer({
-          commentId: "1",
-          username: "soul1",
-          comment: "功率多大",
+          username: this.username,
+          comment: query,
         });
-        if (data.data.answer) {
+        if (data.data.data) {
           let response = {
             username: "Midea",
-            content: data.data.answer,
+            content: data.data.data,
             img: require("@/imgs/midea.jpg"),
             likeTag: "0",
           };
@@ -345,9 +375,12 @@ export default {
       }
     },
     // @我的
-    scrollToMyInfo() {
+    async scrollToMyInfo() {
       console.log("tttttttt");
-      const element = document.getElementById(`item-2`);
+      // const data = await getToMeLatestAnswer(this.username);
+      const data = await getToMeLatestAnswer("dapO");
+      const id = data.data.data.id;
+      const element = document.getElementById(`item-${id}`);
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "start" });
       }
@@ -440,10 +473,6 @@ export default {
   .main {
     width: 100%;
     height: 100vh;
-    background-image: url("~@/imgs/2.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     overflow: hidden;
     ::v-deep .play-pause-layer {
       display: none;
@@ -478,7 +507,7 @@ export default {
       .proImg {
         width: 260px;
         height: 18vh;
-        background-image: url("~@/imgs/4.jpg");
+        background-image: url("~@/imgs/b.jpg");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -511,7 +540,7 @@ export default {
     .proImg {
       width: 120px;
       height: 120px;
-      background-image: url("~@/imgs/4.jpg");
+      background-image: url("~@/imgs/b.jpg");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;

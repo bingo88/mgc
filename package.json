@@ -19,7 +19,6 @@
     "nodemailer": "^6.9.8",
     "postcss-pxtorem": "^6.1.0",
     "secure-random": "^1.1.2",
-    "uview-ui": "^2.0.36",
     "vue": "^2.6.11",
     "vue-core-video-player": "^0.2.0",
     "vue-router": "^3.6.5",
@@ -32,8 +31,8 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
-    "sass": "^1.69.7",
-    "sass-loader": "^10.1.1",
+    "sass": "^1.77.8",
+    "sass-loader": "^10.5.2",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {

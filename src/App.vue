@@ -28,6 +28,21 @@ body {
   font-size: 16px;
   /* color: #fff; */
 }
+#dify-chatbot-bubble-button {
+  background-color: #1c64f2 !important;
+  /* z-index: 999 !important; */
+  position: fixed !important;
+  bottom: unset !important;
+  top: 50% !important;
+}
+#dify-chatbot-bubble-window {
+  height: 100% !important;
+  width: 100% !important;
+  bottom: unset !important;
+  right: unset !important;
+  background-color: blue;
+  z-index: 110 !important;
+}
 #app{
   width: 100%;
 }

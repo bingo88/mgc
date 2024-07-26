@@ -17,6 +17,14 @@
         ></el-button>
         <div class="info">显示字幕</div>
       </div>
+      <div class="btn">
+        <el-button
+          type="primary"
+          circle
+          icon="icon iconfont icon-qiehuanyuyan"
+        ></el-button>
+        <div class="info">切换语言</div>
+      </div>
     </div>
     <el-button type="primary" @click="close">取消</el-button>
   </div>

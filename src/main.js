@@ -4,9 +4,8 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import router from './router'
 
-import './assets/font_4627739_4gg6jjqzzoo/iconfont.css'
-import uView from 'uview-ui'
-Vue.use(uView)
+import './assets/font_4627739_tpn4vxjltc/iconfont.css'
+
 import './rem'
 
 import VueCoreVideoPlayer from 'vue-core-video-player'
